@@ -5,8 +5,8 @@ from kivy.properties import (BooleanProperty, StringProperty, ObjectProperty, Op
 from kivy.clock import Clock
 
 from jnius import autoclass, cast, PythonJavaClass, java_method, JavaClass, MetaJavaClass, JavaMethod
-# import numpy as np 
-# import cv2
+import numpy as np 
+import cv2
 
 import logging
 from enum import Enum

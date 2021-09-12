@@ -3,7 +3,7 @@ import logging
 from functools import partial
 from enum import Enum
 
-from kivy.app import App
+from kivymd.app import App
 from kivy.animation import Animation
 from kivy import platform
 from kivy.lang import Builder
@@ -17,6 +17,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.stencilview import StencilView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
+from kivy.uix.screenmanager import Screen
 
 from kivy.uix.image import  Image 
 
@@ -37,47 +38,72 @@ class PermissionRequestStates(Enum):
     DO_NOT_HAVE_PERMISSION = "DO_NOT_HAVE_PERMISSION"
     AWAITING_REQUEST_RESPONSE = "AWAITING_REQUEST_RESPONSE"
 
-class RootLayout(FloatLayout):
-    buttons_visible = BooleanProperty(True)
 
-    _buttons_visible_fraction = NumericProperty(1.0)
+class KivyCamera(Image):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        self.anim_to_1 = Animation(_buttons_visible_fraction=1.0, duration=0.5)
-        self.anim_to_0 = Animation(_buttons_visible_fraction=0.0, duration=0.5)
-
-    def hide_buttons(self):
-        self.buttons_visible = False
-
-    def show_buttons(self):
-        self.buttons_visible = True
-
-    def on_touch_down(self, touch):
-        touch_consumed = super().on_touch_down(touch)
-        if not touch_consumed:
-            touch.ud["show_buttons"] = True
-
-    def on_touch_up(self, touch):
-        if touch.ud.get("show_buttons", False):
-            self.buttons_visible = True
-        return super().on_touch_up(touch)
-
-    def on_buttons_visible(self, instance, value):
-        Animation.cancel_all(self, "_buttons_visible_fraction")
-        Animation(_buttons_visible_fraction=value, duration=0.45, t="out_cubic").start(self)
-
-class CameraDisplayWidget(Image):
-    preTexture = ObjectProperty(None, allownone=True)
 
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(KivyCamera, self).__init__(**kwargs)
+ 
+        # self.allow_stretch = True
+        self.app = App.get_running_app()
+        # self.oroot = self.app.getScreen('enregistrement')
+        # print(self.parent)
+        self.fps =30
 
-    def on_preTexture(self,d,e):
-       
-        print(d)
+
+
+
+    def startUpdate(self):
+        self.event = Clock.schedule_interval(self.actualProgram , 1.0 / self.fps)
+
+        pass
+
+
+
+
+    def stopUpdate(self):
+        self.event.cancel()
+
+        pass
+
+
+
+
+
+
+
+    def update(self, dt):
+        print(self.app.texture.pixels)
+        # ret, img ,imgS = self.getImage()
+        # if ret:
+
+        #     self.displayImage(img)
+
+
+class MenuScreen(Screen):
+    pass
+
+class FaceAndTempScreen(Screen):
+
+    def __init__(self, **kwargs):
+        
+        super(FaceAndTempScreen, self).__init__(**kwargs)
+        self.app = App.get_running_app()
+
+
+
+
+    def myBack(self):
+        self.manager.current ="menu"
+        # sm.current = "menu"
+    def on_pre_enter(self):
+        pass
+        
+        # self.app.startCam()
+
+
 
 
 class CameraApp(App):
@@ -100,22 +126,25 @@ class CameraApp(App):
     def on_camera_permission_state(self, instance, state):
         self._camera_permission_state_string = state.value
 
+
     def build(self):
-        Builder.load_file("androidcamera.kv")
 
-        root = RootLayout()
-
+        self.theme_cls.primary_palette = "Blue"  # "Purple", "Red" Green
+        # self.theme_cls.theme_style = "Dark"
         self.camera_interface = PyCameraInterface()
 
-        Clock.schedule_interval(self.update, 0)
 
         self.debug_print_camera_info()
 
         self.inspect_cameras()
 
         self.restart_stream()
+        self.screen = Builder.load_file('androidcamera.kv')
+        Clock.schedule_interval(self.update, 0)
+        return self.screen
 
-        return root
+
+
 
     def inspect_cameras(self):
         cameras = self.camera_interface.cameras
@@ -192,19 +221,18 @@ class CameraApp(App):
         self.texture = camera.start_preview(tuple(self.camera_resolution))
 
         self.current_camera = camera
-        Clock.schedule_interval(self.getPixels , 1.0 / 30)
-    def getPixels(self,dt):
 
-        print(self.texture.pixels)
+
 
     def on_texture(self, instance, value):
         print("App texture changed to {}".format(value))
+        
 
     def update(self, dt):
         self.root.canvas.ask_update()
-        if self.current_camera :
-            pass
-            # print(self.current_camera.getImage())
+        print(self.texture.pixels)
+
+
 
     
 

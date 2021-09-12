@@ -1,14 +1,55 @@
-<CameraDisplayWidget>:
+ScreenManager:
+    MenuScreen:
+    FaceAndTempScreen:
+
+<MenuScreen>:
+    name: 'menu'
+    BoxLayout:
+        orientation: "vertical"
+        spacing: "10dp"
+        MDToolbar:
+            elevation: 10
+            title: "Menu"
+
+        ScrollView:
+            MDGridLayout:
+                spacing: "50dp"
+                padding: "50dp"
+                id : md_list
+                cols :2
+                MDCard:
+                    orientation: "vertical"
+                    on_press: root.manager.current = 'profile'
+
+                    FitImage:
+                        source: "data/image_app/face.jpeg"
+                        size_hint_y: .8 
+                    MDLabel:
+                        text: "Identification / Controle thermique"
+                        theme_text_color: "Primary"
+                        font_style: "H6"
+                        halign: "center"
+                        bold: True
+                        size_hint_y: .2
 
 
-<RootLayout>:
-    orientation: "vertical"
-    CameraDisplayWidget:
-        id: cdw
-        texture: app.texture
-        resolution: app.camera_resolution
+<FaceAndTempScreen>:
+    name: 'profile'
 
-
-
-
-
+    MDBoxLayout:
+        orientation: "vertical"
+        MDToolbar:
+            elevation: 10
+            # left_action_items: [['arrow-left', lambda x:  root.myBack()]]
+            # right_action_items: [["thermometer", lambda x: container.show_temp_dialog(),"thermometer"],["speedometer", lambda x: container.show_distance_dialog(),"FPS"],["fan", lambda x: container.show_fps_dialog(),"FPS"],["webcam", lambda x: container.show_cam_dialog()],["robot", lambda x: container.show_program_dialog()]]
+            title: "Identification / Controle thermique"
+        GridLayout:
+            padding: 0
+            spacing: 0
+            cols:2
+            KivyCamera:
+                oroot : root
+                allow_stretch: True
+                keep_ratio: False
+                #source:'data/image_app/photo.gif'
+                id : container
